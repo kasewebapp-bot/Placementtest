@@ -150,7 +150,7 @@
                     const data = docSnap.data();
                     sessionStorage.setItem('candidate_mobile', mobile);
                     sessionStorage.setItem('candidate_name', data.fullName);
-                    sessionStorage.setItem('candidate_regId', mobile);
+                    sessionStorage.setItem('candidate_regId', data.regId);
                     sessionStorage.setItem('candidate_gender', data.gender || "");
                 }
 

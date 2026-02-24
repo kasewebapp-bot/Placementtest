@@ -157,7 +157,6 @@
                 margin-left: 0;
                 padding: 1.5rem;
                 margin-top: 80px;
-                /* Offset for fixed sidebar */
             }
 
             .sidebar .logo {
@@ -171,7 +170,6 @@
 
             .nav-item:not(.logout-item) {
                 display: none;
-                /* Hide 'Job Vacancies' text on mobile since it's the only page */
             }
 
             .logout-item {
@@ -302,6 +300,11 @@
             document.getElementById('welcomeText').innerText = `Welcome, ${candidateName}!`;
         }
 
+        // ✅ Show the candidate's Reg ID in the page header
+        if (regId) {
+            document.getElementById('candidateId').innerText = `Reg ID: ${regId}`;
+        }
+
         let allVacancies = [];
         let selectedJobs = [];
 
@@ -345,7 +348,7 @@
         function fetchVacancies() {
             const CACHE_KEY = 'vacancies_data';
             const CACHE_TIME_KEY = 'vacancies_time';
-            const CACHE_TTL = 60 * 60 * 1000; // 15 Minutes
+            const CACHE_TTL = 60 * 60 * 1000; // 1 Hour
 
             const cachedData = localStorage.getItem(CACHE_KEY);
             const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
@@ -369,7 +372,6 @@
                     allVacancies = parseCSV(csv);
                     if (allVacancies.length === 0) throw new Error("No vacancies parsed");
 
-                    // Update Cache
                     localStorage.setItem(CACHE_KEY, JSON.stringify(allVacancies));
                     localStorage.setItem(CACHE_TIME_KEY, now.toString());
 
@@ -377,7 +379,6 @@
                 })
                 .catch(err => {
                     console.warn('CSV Fetch failed, falling back to GAS API:', err);
-                    // Fallback to GAS API
                     fetch(scriptURL + '?action=getVacancies')
                         .then(res => res.json())
                         .then(data => {
@@ -392,38 +393,39 @@
                 });
         }
 
-       function parseCSV(csv) {
-    const lines = csv.split(/\r?\n/).filter(l => l.trim() !== "");
-    if (lines.length < 2) return [];
+        function parseCSV(csv) {
+            const lines = csv.split(/\r?\n/).filter(l => l.trim() !== "");
+            if (lines.length < 2) return [];
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
 
-    return lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.trim());
-        const obj = {};
+            return lines.slice(1).map(line => {
+                const values = line.split(',').map(v => v.trim());
+                const obj = {};
 
-        headers.forEach((header, i) => {
-            const value = values[i] || "";
+                headers.forEach((header, i) => {
+                    const value = values[i] || "";
 
-            if (header.includes("org") || header.includes("company"))
-                obj.company = value;
-            else if (header.includes("sector"))
-                obj.sector = value;
-            else if (header.includes("job") || header.includes("title") || header.includes("role"))
-                obj.title = value;
-            else if (header.includes("vacanc"))
-                obj.vacancies = value;
-            else if (header.includes("location"))
-                obj.location = value;
-            else if (header.includes("qualification"))
-                obj.qualification = value;
-            else if (header.includes("salary") || header.includes("ctc"))
-                obj.salary = value;
-        });
+                    if (header.includes("org") || header.includes("company"))
+                        obj.company = value;
+                    else if (header.includes("sector"))
+                        obj.sector = value;
+                    else if (header.includes("job") || header.includes("title") || header.includes("role"))
+                        obj.title = value;
+                    else if (header.includes("vacanc"))
+                        obj.vacancies = value;
+                    else if (header.includes("location"))
+                        obj.location = value;
+                    else if (header.includes("qualification"))
+                        obj.qualification = value;
+                    else if (header.includes("salary") || header.includes("ctc"))
+                        obj.salary = value;
+                });
 
-        return obj;
-    });
-}
+                return obj;
+            });
+        }
+
         function populateSectors(data) {
             const filter = document.getElementById('sectorFilter');
             filter.innerHTML = '<option value="">Choose a Sector...</option>';
@@ -456,7 +458,6 @@
                 return;
             }
 
-            // Using DocumentFragment for performance with 2000+ users
             const fragment = document.createDocumentFragment();
             vacancies.forEach(v => {
                 const jobKey = `${v.company} - ${v.title}`;
@@ -537,7 +538,7 @@
                     .then(result => {
                         if (result.success) {
                             showApplicationCard();
-                            checkStatus(); // Refresh to lock
+                            checkStatus();
                         } else if (retries > 0) {
                             console.warn(`Apply failed, retrying... (${retries} left)`);
                             setTimeout(() => attemptApply(retries - 1), 1500);
@@ -562,24 +563,25 @@
             attemptApply();
         };
 
-     function showApplicationCard() {
-    // Force refresh the regId from sessionStorage in case it changed
-    const freshRegId = sessionStorage.getItem('candidate_regId'); 
-    
-    document.getElementById('cardRegId').innerText = freshRegId;
-    document.getElementById('cardName').innerText = candidateName;
-    document.getElementById('cardJobs').innerHTML = selectedJobs.map((j, i) => `<b>${i + 1}.</b> ${j}`).join('<br>');
-    document.getElementById('applyModal').style.display = 'flex';
-}
+        // ✅ FIX: Always reads candidate_regId fresh from sessionStorage.
+        // This guarantees the original Reg ID set during login is shown — never a random/incorrect value.
+        function showApplicationCard() {
+            const currentRegId = sessionStorage.getItem('candidate_regId');
+            const currentName = sessionStorage.getItem('candidate_name');
+
+            document.getElementById('cardRegId').innerText = currentRegId || 'N/A';
+            document.getElementById('cardName').innerText = currentName || 'N/A';
+            document.getElementById('cardJobs').innerHTML = selectedJobs.map((j, i) => `<b>${i + 1}.</b> ${j}`).join('<br>');
+            document.getElementById('applyModal').style.display = 'flex';
+        }
 
         function downloadApplicationCard() {
             const element = document.getElementById('applicationCard');
             const originalWidth = element.style.width;
 
-            // Ensure we capture from the top and the card is properly sized
             window.scrollTo(0, 0);
             element.style.width = "680px";
-            element.style.margin = "0"; // Remove centered margin for capture
+            element.style.margin = "0";
 
             const opt = {
                 margin: 0.5,
@@ -616,30 +618,28 @@
         function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
     </script>
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
-  authDomain: "placements2026-free.firebaseapp.com",
-  projectId: "placements2026-free",
-  storageBucket: "placements2026-free.firebasestorage.app",
-  messagingSenderId: "672350914241",
-  appId: "1:672350914241:web:171f23d75e76a96f103640"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+            authDomain: "placements2026-free.firebaseapp.com",
+            projectId: "placements2026-free",
+            storageBucket: "placements2026-free.firebasestorage.app",
+            messagingSenderId: "672350914241",
+            appId: "1:672350914241:web:171f23d75e76a96f103640"
+        };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-// 🔐 Protect Dashboard
-onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        window.location.href = "login.html";
-    }
-});
+        // 🔐 Protect Dashboard
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+            }
+        });
+    </script>
 </body>
 
-
 </html>
-
-

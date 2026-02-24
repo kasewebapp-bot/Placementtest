@@ -155,16 +155,28 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
 
+            // ✅ DEBUG: Log ALL Firestore fields so you can see exact field names
+            console.log("✅ Firestore document data:", data);
+            console.log("All field keys:", Object.keys(data));
+
             sessionStorage.setItem('candidate_mobile', mobile);
-            sessionStorage.setItem('candidate_name', data.fullName);
-            sessionStorage.setItem('candidate_regId', data.regId); // ✅ CORRECT
-            sessionStorage.setItem('candidate_gender', data.gender || "");
+            sessionStorage.setItem('candidate_name', data.fullName || data.name || data.Name || "");
+            sessionStorage.setItem('candidate_gender', data.gender || data.Gender || "");
+
+            // ✅ FIX: Try every possible field name your Firestore doc might use for Reg ID
+            const regId = data.regId || data.RegId || data.reg_id || data.registrationId || data.candidateId || data.id || "";
+            sessionStorage.setItem('candidate_regId', regId);
+
+            console.log("Stored regId in sessionStorage:", regId);
+        } else {
+            console.warn("No Firestore document found for mobile:", mobile);
         }
 
         window.location.href = "dashboard.html";
 
     } catch (error) {
 
+        console.error("Login error:", error);
         alert("Invalid mobile or password");
 
         submitBtn.disabled = false;

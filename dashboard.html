@@ -617,10 +617,11 @@
 
         function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
     </script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    <!-- Firebase SDKs (Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
             authDomain: "placements2026-free.firebaseapp.com",
@@ -630,16 +631,18 @@
             appId: "1:672350914241:web:171f23d75e76a96f103640"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
         // 🔐 Protect Dashboard
-        onAuthStateChanged(auth, (user) => {
+        auth.onAuthStateChanged((user) => {
             if (!user) {
                 window.location.href = "login.html";
             }
         });
     </script>
+
 </body>
 
 </html>

@@ -1,7 +1,11 @@
+@@ -1,54 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <title>Candidate Login</title>
+  <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Login - Placement Drive 2026</title>
@@ -71,6 +75,48 @@
 
 <body>
 
+<h2>Candidate Login</h2>
+
+<form id="loginForm">
+  <input type="tel" name="mobile" placeholder="Mobile Number" required pattern="[0-9]{10}" maxlength="10"><br><br>
+  <input type="password" name="password" placeholder="Password" required><br><br>
+  <button type="submit">Login</button>
+</form>
+
+<p>Not registered? <a href="index.html">Register here</a></p>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+  authDomain: "placements2026-free.firebaseapp.com",
+  projectId: "placements2026-free",
+  storageBucket: "placements2026-free.firebasestorage.app",
+  messagingSenderId: "672350914241",
+  appId: "1:672350914241:web:171f23d75e76a96f103640"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const mobile = e.target.mobile.value;
+  const password = e.target.password.value;
+  const fakeEmail = mobile + "@placement.com";
+
+  try {
+    await signInWithEmailAndPassword(auth, fakeEmail, password);
+    alert("Login Successful!");
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    alert("Invalid mobile or password");
+  }
+});
+</script>
     <header class="header">
         <div class="container">
             <nav>
@@ -150,7 +196,7 @@
                     const data = docSnap.data();
                     sessionStorage.setItem('candidate_mobile', mobile);
                     sessionStorage.setItem('candidate_name', data.fullName);
-                    sessionStorage.setItem('candidate_regId', data.regId);
+                    sessionStorage.setItem('candidate_regId', mobile);
                     sessionStorage.setItem('candidate_gender', data.gender || "");
                 }
 

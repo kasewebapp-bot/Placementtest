@@ -7,11 +7,10 @@ const firebaseConfig = {
     appId: "1:672350914241:web:171f23d75e76a96f103640"
 };
 
-// Initialize Firebase
+// Initialize Firebase (Compatibility Mode)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -109,9 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Double the items for infinite scroll effect
-    [...recruiters, ...recruiters].forEach(company => {
-        track.appendChild(createLogoCard(company));
-    });
+    if (track) {
+        [...recruiters, ...recruiters].forEach(company => {
+            track.appendChild(createLogoCard(company));
+        });
+    }
 
     // Populate Sectors on Landing Page (Dual Carousel)
     const sectorsTrack1 = document.getElementById('sectors-track-1');
@@ -167,52 +168,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Populate Sectors as Checkboxes
     const sectorContainer = document.getElementById('sector-checkboxes');
-    sectors.forEach(name => {
-        const label = document.createElement('label');
-        label.innerHTML = `<input type="checkbox" name="preferredSector" value="${name}"> ${name}`;
-        sectorContainer.appendChild(label);
-    });
+    if (sectorContainer) {
+        sectors.forEach(name => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" name="preferredSector" value="${name}"> ${name}`;
+            sectorContainer.appendChild(label);
+        });
 
-    // Sector Checkbox Limit (Max 3)
-    sectorContainer.addEventListener('change', () => {
-        const checked = sectorContainer.querySelectorAll('input:checked');
-        if (checked.length >= 3) {
-            sectorContainer.querySelectorAll('input:not(:checked)').forEach(cb => cb.disabled = true);
-        } else {
-            sectorContainer.querySelectorAll('input').forEach(cb => cb.disabled = false);
-        }
-    });
+        // Sector Checkbox Limit (Max 3)
+        sectorContainer.addEventListener('change', () => {
+            const checked = sectorContainer.querySelectorAll('input:checked');
+            if (checked.length >= 3) {
+                sectorContainer.querySelectorAll('input:not(:checked)').forEach(cb => cb.disabled = true);
+            } else {
+                sectorContainer.querySelectorAll('input').forEach(cb => cb.disabled = false);
+            }
+        });
+    }
 
     // Age Auto-calculation
     const dobInput = document.getElementById('dob');
     const ageInput = document.getElementById('age');
 
-    dobInput.addEventListener('change', () => {
-        if (!dobInput.value) return;
-        const dob = new Date(dobInput.value);
-        const today = new Date();
-        let age = today.getFullYear() - dob.getFullYear();
-        const m = today.getMonth() - dob.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-            age--;
-        }
-        ageInput.value = age;
-    });
+    if (dobInput && ageInput) {
+        dobInput.addEventListener('change', () => {
+            if (!dobInput.value) return;
+            const dob = new Date(dobInput.value);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            ageInput.value = age;
+        });
+    }
 
     // Employment Status Toggle Logic
     const toggle = document.getElementById('employment-status-toggle');
     const expDetails = document.getElementById('experience-details');
-    const expInputs = expDetails.querySelectorAll('input, select');
 
-    toggle.addEventListener('change', (e) => {
-        if (e.target.value === 'Experienced') {
-            expDetails.classList.remove('hidden');
-            expInputs.forEach(input => input.required = true);
-        } else {
-            expDetails.classList.add('hidden');
-            expInputs.forEach(input => input.required = false);
-        }
-    });
+    if (toggle && expDetails) {
+        const expInputs = expDetails.querySelectorAll('input, select');
+        toggle.addEventListener('change', (e) => {
+            if (e.target.value === 'Experienced') {
+                expDetails.classList.remove('hidden');
+                expInputs.forEach(input => input.required = true);
+            } else {
+                expDetails.classList.add('hidden');
+                expInputs.forEach(input => input.required = false);
+            }
+        });
+    }
 
     // Success Modal Logic
     const modal = document.getElementById('successModal');
@@ -221,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeModal) {
         closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
             modal.classList.remove('show');
             document.body.style.overflow = ''; // Unlock scroll
         });
@@ -229,22 +237,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
             const element = document.getElementById('admitCardPrint');
-            const regId = document.getElementById('displayRegId').innerText;
+            const regIdEl = document.getElementById('displayRegId');
+            const regId = regIdEl ? regIdEl.innerText : "ADMIT_CARD";
 
-            // Fix: Scroll to top to ensure capturing the modal area correctly
             window.scrollTo(0, 0);
 
             const opt = {
                 margin: 0.5,
                 filename: `KASE_AdmitCard_${regId.replace(/\//g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 3,
-                    useCORS: true,
-                    letterRendering: true,
-                    scrollY: 0,
-                    scrollX: 0
-                },
+                html2canvas: { scale: 3, useCORS: true, letterRendering: true, scrollY: 0, scrollX: 0 },
                 jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
@@ -263,125 +265,175 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Form Submission to Google Sheet
+    // --- Validation Helpers ---
+    function showError(input, message) {
+        if (!input) return;
+        input.classList.add('error-input');
+        const parent = input.closest('.form-group');
+        if (!parent) return;
+        let hint = parent.querySelector('.error-hint');
+        if (!hint) {
+            hint = document.createElement('span');
+            hint.className = 'error-hint';
+            parent.appendChild(hint);
+        }
+        hint.innerText = message;
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.error-input').forEach(el => el.classList.remove('error-input'));
+        document.querySelectorAll('.error-hint').forEach(el => el.remove());
+    }
+
+    // Form Submission Logic
     const form = document.getElementById('placementForm');
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyvI1SxTqioDr9ubaeykXpOODg8nxhAuhc-OuUpnTBhGR8KE3iE7Ryh45l0erADDEQ/exec';
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
 
-        // Visual feedback
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerText;
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...';
-
-        const formData = new FormData(form);
-        const data = { action: 'register' };
-        const preferredSectors = [];
-
-        formData.forEach((value, key) => {
-            if (key === 'preferredSector') {
-                preferredSectors.push(value);
-            } else if (key === 'location') {
-                if (!data[key]) data[key] = [];
-                data[key].push(value);
-            } else {
-                data[key] = value;
+            // 1. Manual Validation Check
+            if (!form.checkValidity()) {
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Show errors for all invalid fields
+                    form.querySelectorAll(':invalid').forEach(field => {
+                        const group = field.closest('.form-group');
+                        const labelEl = group ? group.querySelector('label') : null;
+                        const label = labelEl ? labelEl.innerText.replace('(Required)', '').trim() : "This field";
+                        showError(field, `${label} is required or invalid`);
+                    });
+                }
+                return;
             }
-        });
 
-        // Send Address fields individually to GAS
-        data.houseInfo = formData.get('houseInfo') || "";
-        data.place = formData.get('place') || "";
-        data.PinCode = formData.get('pincode') || "";
-        data.panchayat = formData.get('panchayat') || "";
+            // Visual feedback
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Verifying...';
 
+            const formData = new FormData(form);
+            const data = { action: 'register' };
+            const preferredSectors = [];
 
-        // Combine for Admit Card display (Strict 5-line format)
-        const displayAddress = [
-            formData.get('houseInfo'),
-            formData.get('place'),
-            formData.get('pincode'),
-            formData.get('panchayat'),
-            formData.get('district')
-        ].filter(p => p && p.trim() !== "").join('<br>');
+            formData.forEach((value, key) => {
+                if (key === 'preferredSector') {
+                    preferredSectors.push(value);
+                } else if (key === 'location') {
+                    if (!data[key]) data[key] = [];
+                    data[key].push(value);
+                } else {
+                    data[key] = value;
+                }
+            });
 
+            const mobileNum = data.mobile;
 
-        // Split sectors into 3 separate fields (for sheet columns)
-        data.sector1 = preferredSectors[0] || "";
-        data.sector2 = preferredSectors[1] || "";
-        data.sector3 = preferredSectors[2] || "";
+            try {
+                // 2. CHECK IF MOBILE EXISTS (To prevent duplicates)
+                const mobileCheck = await db.collection("users").doc(mobileNum).get();
+                if (mobileCheck.exists) {
+                    showError(form.querySelector('#mobile'), 'This mobile number is already registered.');
+                    form.querySelector('#mobile').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                    return;
+                }
 
-        // Join location array
-        if (data.location) data.location = data.location.join(', ');
+                submitBtn.innerText = 'Registering...';
 
-        if (scriptURL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL' || scriptURL === "") {
-            alert('Setup Error: Please configure the scriptURL in script.js');
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalText;
-            return;
-        }
+                // Send Address fields individually to GAS (Matches Apps Script expectation)
+                data.houseInfo = formData.get('houseInfo') || "";
+                data.place = formData.get('place') || "";
+                data.PinCode = formData.get('pincode') || "";
+                data.panchayat = formData.get('panchayat') || "";
 
-        // New Sequence: 
-        // 1. Google Sheets (to get regId)
-        // 2. Firebase Auth (create user)
-        // 3. Firestore (save profile with regId)
+                // Split sectors into 3 separate fields (for sheet columns)
+                data.sector1 = preferredSectors[0] || "";
+                data.sector2 = preferredSectors[1] || "";
+                data.sector3 = preferredSectors[2] || "";
 
-        fetch(scriptURL, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(result => {
+                // Join location array
+                if (data.location) data.location = data.location.join(', ');
+
+                // 3. Register in Google Sheets (Get official regId)
+                const sheetsRes = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(data) });
+                const result = await sheetsRes.json();
+
                 if (!result.success) throw new Error(result.error || 'Google Sheets registration failed');
 
                 const regId = result.regId;
-                const fakeEmail = data.mobile + "@placement.com";
+                const fakeEmail = mobileNum + "@placement.com";
 
-                // Step 2: Create Firebase User
-                return auth.createUserWithEmailAndPassword(fakeEmail, data.password)
-                    .then(() => {
-                        // Step 3: Store user profile in Firestore
-                        return db.collection("users").doc(data.mobile).set({
-                            regId: regId,
-                            fullName: data.fullName,
-                            gender: data.gender,
-                            mobile: data.mobile,
-                            email: data.email,
-                            district: data.district,
-                            qualification: data.qualification,
-                            regDate: new Date().toISOString()
-                        });
-                    })
-                    .then(() => result); // Pass result to the next .then for UI handling
-            })
+                // 4. Create Firebase Auth (Use phone-based email to ignore physical email conflicts)
+                try {
+                    await auth.createUserWithEmailAndPassword(fakeEmail, data.password);
+                } catch (authError) {
+                    // If auth already exists but firestore missed it, we ignore and proceed to profile update
+                    if (authError.code !== 'auth/email-already-in-use') throw authError;
+                }
 
-            .then(result => {
+                // 5. Store user profile in Firestore (Including the official regId!)
+                await db.collection("users").doc(mobileNum).set({
+                    regId: regId,
+                    fullName: data.fullName,
+                    gender: data.gender,
+                    mobile: mobileNum,
+                    email: data.email,
+                    district: data.district,
+                    qualification: data.qualification,
+                    regDate: new Date().toISOString()
+                });
+
+                // Update Success Modal Content
+                if (document.getElementById('displayRegId')) {
+                    document.getElementById('displayRegId').innerText = regId;
+                }
+
+                // Update Admit Card Content
+                const admitFields = {
+                    'displayRegId': regId,
+                    'displayName': data.fullName,
+                    'displayGender': data.gender,
+                    'displayMobile': mobileNum,
+                    'displayEmail': data.email,
+                    'displayQualification': data.qualification,
+                    'displayDistrict': data.district
+                };
+
+                for (const [id, value] of Object.entries(admitFields)) {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = value;
+                }
+
+                const addressEl = document.getElementById('displayAddress');
+                if (addressEl) {
+                    addressEl.innerHTML = [
+                        data.houseInfo, data.place, data.PinCode,
+                        data.panchayat, data.district
+                    ].filter(p => p).join('<br>');
+                }
+
                 // Success Modal and Reset
                 modal.style.display = 'flex';
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
                 form.reset();
-                expDetails.classList.add('hidden');
+                if (expDetails) expDetails.classList.add('hidden');
 
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalText;
-            })
-            .catch(error => {
+
+            } catch (error) {
                 console.error('Registration Error:', error);
-
-                // Specific error handling
-                if (error.code === 'auth/email-already-in-use') {
-                    alert('This mobile number is already registered in our authentication system. Please try logging in.');
-                } else {
-                    alert('Registration Error: ' + error.message);
-                }
-
+                alert('Registration Error: ' + error.message);
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalText;
-            });
-
-
-    });
+            }
+        });
+    }
 });

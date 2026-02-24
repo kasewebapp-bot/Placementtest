@@ -1,4 +1,20 @@
+const firebaseConfig = {
+    apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+    authDomain: "placements2026-free.firebaseapp.com",
+    projectId: "placements2026-free",
+    storageBucket: "placements2026-free.firebasestorage.app",
+    messagingSenderId: "672350914241",
+    appId: "1:672350914241:web:171f23d75e76a96f103640"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+
 document.addEventListener('DOMContentLoaded', () => {
+
     // Recruiters Data with Logos
     const recruiters = [
         { name: "ZOHO", logo: "https://res.cloudinary.com/dbpyjdqt2/image/upload/zoho-logo-512_gvy0aw.png" },
@@ -278,17 +294,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Send Address fields individually to GAS
         data.houseInfo = formData.get('houseInfo') || "";
         data.place = formData.get('place') || "";
-        data.postOffice = formData.get('postOffice') || "";
+        data.PinCode = formData.get('pincode') || "";
         data.panchayat = formData.get('panchayat') || "";
+
 
         // Combine for Admit Card display (Strict 5-line format)
         const displayAddress = [
             formData.get('houseInfo'),
             formData.get('place'),
-            formData.get('postOffice'),
+            formData.get('pincode'),
             formData.get('panchayat'),
             formData.get('district')
         ].filter(p => p && p.trim() !== "").join('<br>');
+
 
         // Split sectors into 3 separate fields (for sheet columns)
         data.sector1 = preferredSectors[0] || "";
@@ -305,29 +323,65 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // New Sequence: 
+        // 1. Google Sheets (to get regId)
+        // 2. Firebase Auth (create user)
+        // 3. Firestore (save profile with regId)
+
         fetch(scriptURL, {
             method: 'POST',
             body: JSON.stringify(data)
         })
             .then(res => res.json())
             .then(result => {
-                if (result.success) {
-                    modal.style.display = 'flex';
-                    modal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                    form.reset();
-                    expDetails.classList.add('hidden');
-                } else {
-                    alert('Error: ' + (result.error || 'Submission failed'));
-                }
+                if (!result.success) throw new Error(result.error || 'Google Sheets registration failed');
+
+                const regId = result.regId;
+                const fakeEmail = data.mobile + "@placement.com";
+
+                // Step 2: Create Firebase User
+                return auth.createUserWithEmailAndPassword(fakeEmail, data.password)
+                    .then(() => {
+                        // Step 3: Store user profile in Firestore
+                        return db.collection("users").doc(data.mobile).set({
+                            regId: regId,
+                            fullName: data.fullName,
+                            gender: data.gender,
+                            mobile: data.mobile,
+                            email: data.email,
+                            district: data.district,
+                            qualification: data.qualification,
+                            regDate: new Date().toISOString()
+                        });
+                    })
+                    .then(() => result); // Pass result to the next .then for UI handling
+            })
+
+            .then(result => {
+                // Success Modal and Reset
+                modal.style.display = 'flex';
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                form.reset();
+                expDetails.classList.add('hidden');
+
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalText;
             })
             .catch(error => {
-                console.error('Submission Error:', error);
-                alert('Submission Error: Could not connect to the Google Sheet. Please check your Web App URL and deployment settings.');
+                console.error('Registration Error:', error);
+
+                // Specific error handling
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('This mobile number is already registered in our authentication system. Please try logging in.');
+                } else {
+                    alert('Registration Error: ' + error.message);
+                }
+
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalText;
             });
+
+
     });
 });

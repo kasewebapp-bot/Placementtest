@@ -353,46 +353,62 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-@@ -37,34 +355,38 @@ <h2>Candidate Registration</h2>
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+  authDomain: "placements2026-free.firebaseapp.com",
+  projectId: "placements2026-free",
+  storageBucket: "placements2026-free.firebasestorage.app",
+  messagingSenderId: "672350914241",
+  appId: "1:672350914241:web:171f23d75e76a96f103640"
+};
+
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.getElementById("placementForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-document.getElementById("placementForm").addEventListener("submit", async function () {
+document.addEventListener("DOMContentLoaded", () => {
 
-  const fullName = document.getElementById("fullName").value;
-  const mobile = document.getElementById("mobile").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const fullName = document.getElementById("fullName").value;
-  const email = document.getElementById("email").value;
-  const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+  const form = document.getElementById("placementForm");
 
-  const fakeEmail = mobile + "@placement.com";
+  form.addEventListener("submit", async function(e) {
 
-  try {
+    e.preventDefault();   // STOP page reload
 
-    // Create Firebase login account
-    await createUserWithEmailAndPassword(auth, fakeEmail, password);
+    const mobile = document.getElementById("mobile").value;
+    const password = document.getElementById("password").value;
+    const fullName = document.getElementById("fullName").value;
+    const email = document.getElementById("email").value;
+    const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
 
-    // Save user basic data in Firestore
-    await setDoc(doc(db, "users", mobile), {
-      fullName,
-      email,
-      gender,
-      mobile,
-      createdAt: new Date()
-    });
+    const fakeEmail = mobile + "@placement.com";
 
-    alert("Registration Successful!");
-    window.location.href = "login.html";
-    console.log("Firebase user created");
+    try {
 
-  } catch (error) {
-    alert(error.message);
-    console.log("Firebase error:", error.message);
-  }
+      // Create Firebase account
+      await createUserWithEmailAndPassword(auth, fakeEmail, password);
+
+      // Save Firestore data
+      await setDoc(doc(db, "users", mobile), {
+        fullName,
+        email,
+        gender,
+        mobile,
+        createdAt: new Date()
+      });
+
+      console.log("Firebase registration success");
+
+      // 🔥 NOW manually submit Google Sheet form
+      form.submit();
+
+    } catch (error) {
+      console.log("Firebase error:", error.message);
+      alert(error.message);
+    }
+
+  });
 
 });
 </script>

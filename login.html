@@ -1,54 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Candidate Login</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Login - Placement Drive 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        .login-container {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent),
+                radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent);
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--secondary);
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .register-link {
+            margin-top: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .register-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
 </head>
+
 <body>
 
-<h2>Candidate Login</h2>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <div class="logo" style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="https://res.cloudinary.com/dbpyjdqt2/image/upload/kase-1-scaled_u5ygsl.jpg"
+                        alt="KASE Logo" style="height: 50px;">
+                    <img src="https://res.cloudinary.com/dbpyjdqt2/image/upload/v1771854785/odepc_prctuo.avif"
+                        alt="ODEPEC Logo" style="height: 50px;">
+                </div>
+            </nav>
+        </div>
+    </header>
 
-<form id="loginForm">
-  <input type="tel" name="mobile" placeholder="Mobile Number" required pattern="[0-9]{10}" maxlength="10"><br><br>
-  <input type="password" name="password" placeholder="Password" required><br><br>
-  <button type="submit">Login</button>
-</form>
+    <main class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Candidate Login</h2>
+                <p>Access your profile and apply for jobs</p>
+            </div>
 
-<p>Not registered? <a href="index.html">Register here</a></p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="mobile" required pattern="[0-9]{10}" maxlength="10">
+                </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
-  authDomain: "placements2026-free.firebaseapp.com",
-  projectId: "placements2026-free",
-  storageBucket: "placements2026-free.firebasestorage.app",
-  messagingSenderId: "672350914241",
-  appId: "1:672350914241:web:171f23d75e76a96f103640"
-};
+                <button type="submit" class="btn btn-primary login-btn">Login to Dashboard</button>
+            </form>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+            <div class="register-link">
+                Don't have an account? <a href="index.html#register">Register Now</a>
+            </div>
+        </div>
+    </main>
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    <!-- 🔥 FIREBASE LOGIN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-  const mobile = e.target.mobile.value;
-  const password = e.target.password.value;
-  const fakeEmail = mobile + "@placement.com";
+        const firebaseConfig = {
+            apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+            authDomain: "placements2026-free.firebaseapp.com",
+            projectId: "placements2026-free",
+            storageBucket: "placements2026-free.firebasestorage.app",
+            messagingSenderId: "672350914241",
+            appId: "1:672350914241:web:171f23d75e76a96f103640"
+        };
 
-  try {
-    await signInWithEmailAndPassword(auth, fakeEmail, password);
-    alert("Login Successful!");
-    window.location.href = "dashboard.html";
-  } catch (error) {
-    alert("Invalid mobile or password");
-  }
-});
-</script>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const mobile = document.getElementById("mobile").value;
+            const password = document.getElementById("password").value;
+            const fakeEmail = mobile + "@placement.com";
+
+            const submitBtn = document.querySelector(".login-btn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Logging in...";
+
+            try {
+                await signInWithEmailAndPassword(auth, fakeEmail, password);
+
+                const docSnap = await getDoc(doc(db, "users", mobile));
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    sessionStorage.setItem('candidate_mobile', mobile);
+                    sessionStorage.setItem('candidate_name', data.fullName);
+                    sessionStorage.setItem('candidate_regId', mobile);
+                    sessionStorage.setItem('candidate_gender', data.gender || "");
+                }
+
+                window.location.href = "dashboard.html";
+
+            } catch (error) {
+                alert("Invalid mobile or password");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Login to Dashboard";
+            }
+        });
+    </script>
 
 </body>
+
 </html>

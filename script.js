@@ -253,11 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
             html2pdf().from(element).set(opt).save().then(() => {
                 downloadBtn.innerText = originalText;
                 downloadBtn.disabled = false;
-            }).catch(err => {
-                console.error("PDF Generate Error:", err);
-                downloadBtn.innerText = originalText;
-                downloadBtn.disabled = false;
-            });
+            })
+            
         });
     }
 
@@ -321,10 +318,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
 
-    const response = await fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-    });
+   const response = await fetch(scriptURL, {
+    method: 'POST',
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+});
 
     const result = await response.json();
 
@@ -364,4 +364,5 @@ submitBtn.innerText = originalText;
             });
     });
 });
+
 

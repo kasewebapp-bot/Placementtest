@@ -368,25 +368,77 @@ document.getElementById("placementForm").addEventListener("submit", async functi
   try {
 
     // Create Firebase login account
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+  authDomain: "placements2026-free.firebaseapp.com",
+  projectId: "placements2026-free",
+  storageBucket: "placements2026-free.firebasestorage.app",
+  messagingSenderId: "672350914241",
+  appId: "1:672350914241:web:171f23d75e76a96f103640"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+document.getElementById("placementForm").addEventListener("submit", async function () {
+
+  const mobile = document.getElementById("mobile").value;
+  const password = document.getElementById("password").value;
+  const fullName = document.getElementById("fullName").value;
+  const email = document.getElementById("email").value;
+  const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+
+  const fakeEmail = mobile + "@placement.com";
+
+  try {
+
+    // Create Auth account
     await createUserWithEmailAndPassword(auth, fakeEmail, password);
 
-    // Save user basic data in Firestore
+    // 🔥 Get counter document
+    const counterRef = doc(db, "counters", "registration");
+    const counterSnap = await getDoc(counterRef);
+
+    let newNumber = 1;
+
+    if (counterSnap.exists()) {
+      newNumber = counterSnap.data().lastNumber + 1;
+      await updateDoc(counterRef, { lastNumber: newNumber });
+    } else {
+      await setDoc(counterRef, { lastNumber: 1 });
+      newNumber = 1;
+    }
+
+    // Format 4 digit number
+    const formattedNumber = String(newNumber).padStart(4, '0');
+    const regId = `KASE/PD/NM/${formattedNumber}`;
+
+    // Save user with regId
     await setDoc(doc(db, "users", mobile), {
       fullName,
       email,
       gender,
       mobile,
+      regId,
       createdAt: new Date()
     });
 
-    console.log("Firebase user created");
+    console.log("Registration successful with ID:", regId);
 
   } catch (error) {
-    console.log("Firebase error:", error.message);
+    console.log("Error:", error.message);
   }
 
 });
 </script>
+
+        
 </body>
 
 </html>

@@ -562,12 +562,15 @@
             attemptApply();
         };
 
-        function showApplicationCard() {
-            document.getElementById('cardRegId').innerText = regId;
-            document.getElementById('cardName').innerText = candidateName;
-            document.getElementById('cardJobs').innerHTML = selectedJobs.map((j, i) => `<b>${i + 1}.</b> ${j}`).join('<br>');
-            document.getElementById('applyModal').style.display = 'flex';
-        }
+     function showApplicationCard() {
+    // Force refresh the regId from sessionStorage in case it changed
+    const freshRegId = sessionStorage.getItem('candidate_regId'); 
+    
+    document.getElementById('cardRegId').innerText = freshRegId;
+    document.getElementById('cardName').innerText = candidateName;
+    document.getElementById('cardJobs').innerHTML = selectedJobs.map((j, i) => `<b>${i + 1}.</b> ${j}`).join('<br>');
+    document.getElementById('applyModal').style.display = 'flex';
+}
 
         function downloadApplicationCard() {
             const element = document.getElementById('applicationCard');
@@ -638,4 +641,5 @@ onAuthStateChanged(auth, (user) => {
 
 
 </html>
+
 

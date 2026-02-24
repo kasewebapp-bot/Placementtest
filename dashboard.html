@@ -392,33 +392,38 @@
                 });
         }
 
-        function parseCSV(csv) {
-            const lines = csv.split(/\r?\n/);
-            if (lines.length < 2) return [];
+       function parseCSV(csv) {
+    const lines = csv.split(/\r?\n/).filter(l => l.trim() !== "");
+    if (lines.length < 2) return [];
 
-            // Improved CSV header parsing (accounting for quotes)
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
 
-            return lines.slice(1).filter(line => line.trim() !== "").map(line => {
-                // Split by comma, but handle basic quoted values (no complex nested comma handling)
-                const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-                const obj = {};
-                headers.forEach((header, i) => {
-                    if (!header) return;
-                    const cleanKey = header.toLowerCase();
-                    if (cleanKey.includes("organization")) obj.company = values[i] || "";
-                    else if (cleanKey.includes("sector")) obj.sector = values[i] || "";
-                    else if (cleanKey.includes("job title")) obj.title = values[i] || "";
-                    else if (cleanKey.includes("vacancies")) obj.vacancies = values[i] || "";
-                    else if (cleanKey.includes("location")) obj.location = values[i] || "";
-                    else if (cleanKey.includes("qualification")) obj.qualification = values[i] || "";
-                    else if (cleanKey.includes("salary") || cleanKey.includes("ctc")) obj.salary = values[i] || "";
-                    else obj[header] = values[i] || "";
-                });
-                return obj;
-            });
-        }
+    return lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const obj = {};
 
+        headers.forEach((header, i) => {
+            const value = values[i] || "";
+
+            if (header.includes("org") || header.includes("company"))
+                obj.company = value;
+            else if (header.includes("sector"))
+                obj.sector = value;
+            else if (header.includes("job") || header.includes("title") || header.includes("role"))
+                obj.title = value;
+            else if (header.includes("vacanc"))
+                obj.vacancies = value;
+            else if (header.includes("location"))
+                obj.location = value;
+            else if (header.includes("qualification"))
+                obj.qualification = value;
+            else if (header.includes("salary") || header.includes("ctc"))
+                obj.salary = value;
+        });
+
+        return obj;
+    });
+}
         function populateSectors(data) {
             const filter = document.getElementById('sectorFilter');
             filter.innerHTML = '<option value="">Choose a Sector...</option>';
@@ -633,3 +638,4 @@ onAuthStateChanged(auth, (user) => {
 
 
 </html>
+

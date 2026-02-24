@@ -326,9 +326,61 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script type="module" src="script.js"></script>
+  <script src="script.js"></script>
 
   <!-- Firebase Registration Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+      authDomain: "placements2026-free.firebaseapp.com",
+      projectId: "placements2026-free",
+      storageBucket: "placements2026-free.firebasestorage.app",
+      messagingSenderId: "672350914241",
+      appId: "1:672350914241:web:171f23d75e76a96f103640"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("placementForm");
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const mobile = document.getElementById("mobile").value;
+        const password = document.getElementById("password").value;
+        const fullName = document.getElementById("fullName").value;
+        const email = document.getElementById("email").value;
+        const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+
+        const fakeEmail = mobile + "@placement.com";
+
+        try {
+          await createUserWithEmailAndPassword(auth, fakeEmail, password);
+
+          const regId = "KASE/PD/NM/" + Math.floor(1000 + Math.random() * 9000);
+
+          await setDoc(doc(db, "users", mobile), {
+            fullName,
+            email,
+            gender,
+            mobile,
+            regId,
+            createdAt: new Date()
+          });
+
+          // Show success modal
+          document.getElementById("successModal").style.display = "flex";
+
+        } catch (error) {
+          console.error("Firebase error:", error.message);
+          alert(error.message);
   <!DOCTYPE html>
 <html lang="en">
 
@@ -502,6 +554,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         } else {
             console.warn("No Firestore document found for mobile:", mobile);
         }
+      });
+    });
+  </script>
 
         window.location.href = "dashboard.html";
 

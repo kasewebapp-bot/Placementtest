@@ -329,62 +329,195 @@
   <script src="script.js"></script>
 
   <!-- Firebase Registration Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  <!DOCTYPE html>
+<html lang="en">
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
-      authDomain: "placements2026-free.firebaseapp.com",
-      projectId: "placements2026-free",
-      storageBucket: "placements2026-free.firebasestorage.app",
-      messagingSenderId: "672350914241",
-      appId: "1:672350914241:web:171f23d75e76a96f103640"
-    };
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate Login - Placement Drive 2026</title>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("placementForm");
+<style>
+.login-container {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent),
+                radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent);
+}
 
-      form.addEventListener("submit", async function (e) {
-        e.preventDefault();
+.login-card {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+}
 
-        const mobile = document.getElementById("mobile").value;
-        const password = document.getElementById("password").value;
-        const fullName = document.getElementById("fullName").value;
-        const email = document.getElementById("email").value;
-        const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+.login-header {
+    margin-bottom: 2rem;
+}
 
-        const fakeEmail = mobile + "@placement.com";
+.login-header h2 {
+    font-size: 2rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
 
-        try {
-          await createUserWithEmailAndPassword(auth, fakeEmail, password);
+.login-header p {
+    color: var(--secondary);
+}
 
-          const regId = "KASE/PD/NM/" + Math.floor(1000 + Math.random() * 9000);
+.form-group {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
 
-          await setDoc(doc(db, "users", mobile), {
-            fullName,
-            email,
-            gender,
-            mobile,
-            regId,
-            createdAt: new Date()
-          });
+.login-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+}
 
-          // Show success modal
-          document.getElementById("successModal").style.display = "flex";
+.register-link {
+    margin-top: 1.5rem;
+    color: var(--secondary);
+}
 
-        } catch (error) {
-          console.error("Firebase error:", error.message);
-          alert(error.message);
+.register-link a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+<div class="container">
+<nav>
+<div class="logo" style="display:flex;align-items:center;gap:1rem;">
+<img src="https://res.cloudinary.com/dbpyjdqt2/image/upload/kase-1-scaled_u5ygsl.jpg" style="height:50px;">
+<img src="https://res.cloudinary.com/dbpyjdqt2/image/upload/v1771854785/odepc_prctuo.avif" style="height:50px;">
+</div>
+</nav>
+</div>
+</header>
+
+<main class="login-container">
+<div class="login-card">
+
+<div class="login-header">
+<h2>Candidate Login</h2>
+<p>Access your profile and apply for jobs</p>
+</div>
+
+<form id="loginForm">
+
+<div class="form-group">
+<label>Mobile Number</label>
+<input type="tel" id="mobile" required pattern="[0-9]{10}" maxlength="10">
+</div>
+
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="password" required>
+</div>
+
+<button type="submit" class="btn btn-primary login-btn">
+Login to Dashboard
+</button>
+
+</form>
+
+<div class="register-link">
+Don't have an account? <a href="index.html#register">Register Now</a>
+</div>
+
+</div>
+</main>
+
+<!-- 🔥 FIREBASE LOGIN SCRIPT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+    authDomain: "placements2026-free.firebaseapp.com",
+    projectId: "placements2026-free",
+    storageBucket: "placements2026-free.firebasestorage.app",
+    messagingSenderId: "672350914241",
+    appId: "1:672350914241:web:171f23d75e76a96f103640"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const mobile = document.getElementById("mobile").value;
+    const password = document.getElementById("password").value;
+    const fakeEmail = mobile + "@placement.com";
+
+    const submitBtn = document.querySelector(".login-btn");
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Logging in...";
+
+    try {
+
+        await signInWithEmailAndPassword(auth, fakeEmail, password);
+
+        const docSnap = await getDoc(doc(db, "users", mobile));
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+
+            // ✅ DEBUG: Log ALL Firestore fields so you can see exact field names
+            console.log("✅ Firestore document data:", data);
+            console.log("All field keys:", Object.keys(data));
+
+            sessionStorage.setItem('candidate_mobile', mobile);
+            sessionStorage.setItem('candidate_name', data.fullName || data.name || data.Name || "");
+            sessionStorage.setItem('candidate_gender', data.gender || data.Gender || "");
+
+            // ✅ FIX: Try every possible field name your Firestore doc might use for Reg ID
+            const regId = data.regId || data.RegId || data.reg_id || data.registrationId || data.candidateId || data.id || "";
+            sessionStorage.setItem('candidate_regId', regId);
+
+            console.log("Stored regId in sessionStorage:", regId);
+        } else {
+            console.warn("No Firestore document found for mobile:", mobile);
         }
-      });
-    });
-  </script>
 
+        window.location.href = "dashboard.html";
+
+    } catch (error) {
+
+        console.error("Login error:", error);
+        alert("Invalid mobile or password");
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Login to Dashboard";
+    }
+
+});
+</script>
+
+</body>
+</html>
 </body>
 </html>

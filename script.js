@@ -1,3 +1,17 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4",
+    authDomain: "placements2026-free.firebaseapp.com",
+    projectId: "placements2026-free",
+    storageBucket: "placements2026-free.firebasestorage.app",
+    messagingSenderId: "672350914241",
+    appId: "1:672350914241:web:171f23d75e76a96f103640"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 document.addEventListener('DOMContentLoaded', () => {
     // Recruiters Data with Logos
     const recruiters = [
@@ -251,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('placementForm');
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyvI1SxTqioDr9ubaeykXpOODg8nxhAuhc-OuUpnTBhGR8KE3iE7Ryh45l0erADDEQ/exec';
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // Visual feedback
@@ -305,24 +319,43 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetch(scriptURL, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    modal.style.display = 'flex';
-                    modal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                    form.reset();
-                    expDetails.classList.add('hidden');
-                } else {
-                    alert('Error: ' + (result.error || 'Submission failed'));
-                }
-                submitBtn.disabled = false;
-                submitBtn.innerText = originalText;
-            })
+        try {
+
+    const response = await fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+
+        const regId = result.regId;
+
+        await setDoc(doc(db, "users", data.mobile), {
+            fullName: data.fullName,
+            mobile: data.mobile,
+            gender: data.gender,
+            regId: regId
+        });
+
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        form.reset();
+        expDetails.classList.add('hidden');
+
+    } else {
+        alert('Error: ' + (result.error || 'Submission failed'));
+    }
+
+} catch (error) {
+    console.error('Submission Error:', error);
+    alert('Submission Error: Could not connect to server.');
+}
+
+submitBtn.disabled = false;
+submitBtn.innerText = originalText;
             .catch(error => {
                 console.error('Submission Error:', error);
                 alert('Submission Error: Could not connect to the Google Sheet. Please check your Web App URL and deployment settings.');
@@ -331,3 +364,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 });
+

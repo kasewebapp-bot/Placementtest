@@ -716,36 +716,132 @@ textarea:focus {
     margin-bottom: 1.5rem;
 }
 
-@media (max-width: 640px) {
+/* Mobile & Tablet Overhaul */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .header {
+        height: auto;
+        padding: 0.75rem 0;
+    }
+
+    .header nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .logo img {
+        height: 45px;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .hero {
+        padding: 4rem 0;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-btns {
+        flex-direction: column;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+        padding: 0.85rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
     .form-container {
         padding: 1.5rem;
     }
 
     .form-row,
-    .form-grid-address,
-    .info-grid-admit {
+    .form-grid-address {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .section-title {
-        font-size: 2rem;
+    /* Table Mobile Card View */
+    .vacancy-table,
+    .vacancy-table thead,
+    .vacancy-table tbody,
+    .vacancy-table th,
+    .vacancy-table td,
+    .vacancy-table tr {
+        display: block;
+    }
+
+    .vacancy-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .vacancy-table tr {
+        margin-bottom: 1.5rem;
+        background: var(--white);
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+    }
+
+    .vacancy-table td {
+        border: none;
+        position: relative;
+        padding: 0.75rem 0 !important;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .vacancy-table td:last-child {
+        border-bottom: none;
+    }
+
+    .vacancy-table td:before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        font-size: 0.7rem;
+        color: var(--secondary);
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .vacancy-table td[data-label="Action"] {
+        padding-top: 1rem !important;
     }
 
     .carousel-track {
         animation-duration: 25s;
-        /* Faster for smaller screens */
     }
 
     .modal-content {
-        padding: 1.5rem 1rem;
-        margin-top: 0;
-        border-radius: 1rem;
+        padding: 1.25rem;
         width: 100%;
+        border-radius: 1rem;
     }
 
     .admit-card {
-        padding: 1.25rem;
-        margin: 0.5rem 0;
+        padding: 1rem;
         border-width: 2px;
     }
 
@@ -756,6 +852,10 @@ textarea:focus {
         padding-bottom: 1rem;
     }
 
+    .admit-logo {
+        height: 45px;
+    }
+
     .reg-id-box {
         flex-direction: column;
         gap: 0.5rem;
@@ -763,8 +863,8 @@ textarea:focus {
         padding: 0.75rem;
     }
 
-    .admit-title-box h3 {
-        font-size: 1rem;
+    .info-grid-admit {
+        grid-template-columns: 1fr;
     }
 
     .info-item .value {

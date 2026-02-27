@@ -295,9 +295,36 @@
             box-shadow: var(--shadow);
             margin-bottom: 2rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1.5rem;
             border: 1px solid #f1f5f9;
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                height: auto;
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            body {
+                padding-top: 140px;
+            }
+
+            .candidate-header {
+                flex-direction: column !important;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
+            }
+
+            .candidate-name-large {
+                font-size: 1.5rem !important;
+            }
         }
 
         .stat-num {
@@ -373,51 +400,6 @@
                 gap: 1rem;
             }
 
-            .selection-panel {
-                position: relative;
-                top: 0;
-                padding: 1.25rem;
-            }
-
-            .vacancy-table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-
-            thead {
-                display: none;
-            }
-
-            tr {
-                margin-bottom: 1.25rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 1rem;
-                padding: 1rem;
-                background: #fff;
-                box-shadow: var(--shadow);
-            }
-
-            td {
-                border: none;
-                padding: .5rem 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            td::before {
-                content: attr(data-label);
-                font-weight: 700;
-                color: var(--secondary);
-                min-width: 100px;
-                font-size: .85rem;
-            }
-
             .filter-row {
                 grid-template-columns: 1fr !important;
                 gap: 1rem !important;
@@ -439,7 +421,7 @@
             }
 
             .admit-body {
-                padding: 1.5rem;
+                padding: 1rem;
             }
         }
     </style>
@@ -459,7 +441,7 @@
 
     <main class="main-content">
         <header style="margin-bottom:1.5rem;">
-            <h1 id="welcomeText" style="font-size:2rem;font-weight:800;">Welcome Back!</h1>
+            <h1 id="welcomeText" style="font-size:2rem;font-weight:800;">Welcome!</h1>
             <p id="candidateId" style="color:var(--secondary);font-weight:600;margin-top:.25rem;"></p>
         </header>
 
@@ -520,7 +502,13 @@
                     📄 Download Admit Card
                 </button>
             </div>
-            <h2 style="margin-bottom:1rem;font-size:1.3rem;">My Applied Roles</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2 style="font-size:1.3rem;">My Applied Roles</h2>
+                <button id="refreshStatusBtn" class="btn btn-secondary"
+                    style="font-size:0.8rem; padding: 0.4rem 0.8rem;" onclick="refreshApplicationStatus()">
+                    🔄 Refresh Status
+                </button>
+            </div>
             <div class="card-grid" id="appliedList"></div>
             <div
                 style="margin-top:1.5rem;background:#e0f2fe;padding:1.25rem;border-radius:1rem;border:1px dashed var(--primary);font-size:.9rem;color:var(--primary);font-weight:600;">
@@ -621,115 +609,165 @@
     <script>
         const VACANCY_DATA = [
             { "company": "Malabar Group", "role": "Cashier & Billing Associates", "sector": "Retail", "qualification": "Degree/Diploma", "specialization": "", "experience": "1-2year/Freshers", "salary": "Rs-15000-20000", "location": "Trivandrum, Kochi, Thrisur, Kozhikode", "vacancies": "10" },
-            { "company": "WHITECORN GROUP", "role": "Administration asst", "sector": "Manufacturing &Distribution", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "WHITECORN GROUP", "role": "store asst", "sector": "Manufacturing &Distribution", "qualification": "Degree/Diploma", "specialization": "", "experience": "2 years", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "WHITECORN GROUP", "role": "account asst", "sector": "Manufacturing &Distribution", "qualification": "Degree", "specialization": "", "experience": "2 years", "salary": "15,500-60,500(TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "WHITECORN GROUP", "role": "factory asst", "sector": "Manufacturing &Distribution", "qualification": "10th /12th", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "100" },
-            { "company": "WHITECORN GROUP", "role": "distribution asst", "sector": "Manufacturing &Distribution", "qualification": "10th /12th", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "WHITECORN GROUP", "role": "sales agent", "sector": "Manufacturing &Distribution", "qualification": "10th /12th", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "WHITECORN GROUP", "role": "packing staff", "sector": "Manufacturing &Distribution", "qualification": "10th /12th", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "WHITECORN GROUP", "role": "supervisor", "sector": "Manufacturing &Distribution", "qualification": "BBA/MBA/PG", "specialization": "", "experience": "3 years", "salary": "15,500-60,500(TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "" },
-            { "company": "Hotel Dimora Thiruvananthapuram", "role": "F & B associates", "sector": "Hospitality", "qualification": "Hotel Management", "specialization": "Food & beverages", "experience": "1 year and above", "salary": "18000-20000", "location": "Trivandrum", "vacancies": "3" },
+            { "company": "Malabar Group", "role": "Administration asst", "sector": "Manufacturing &Distribution", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "10" },
+            { "company": "Malabar Group", "role": "store asst", "sector": "Manufacturing &Distribution", "qualification": "Degree/Diploma", "specialization": "", "experience": "2 years", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "10" },
+            { "company": "WHITECORN GROUP", "role": "account asst", "sector": "Manufacturing &Distribution", "qualification": "Degree/Diploma", "specialization": "", "experience": "2 years", "salary": "15,500-60,500(TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "10" },
+            { "company": "WHITECORN GROUP", "role": "factory asst", "sector": "Manufacturing &Distribution", "qualification": "ITI/ITC/Diploma", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "10" },
+            { "company": "WHITECORN GROUP", "role": "distribution asst", "sector": "Manufacturing &Distribution", "qualification": "ITI/ITC/Diploma", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "15" },
+            { "company": "WHITECORN GROUP", "role": "sales agent", "sector": "Manufacturing &Distribution", "qualification": "ITI/ITC/Diploma", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "15" },
+            { "company": "WHITECORN GROUP", "role": "packing staff", "sector": "Manufacturing &Distribution", "qualification": "ITI/ITC/Diploma", "specialization": "Iti,diploma", "experience": "Freshers /Experienced", "salary": "12000 -15,500 (TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "10" },
+            { "company": "WHITECORN GROUP", "role": "supervisor", "sector": "Manufacturing &Distribution", "qualification": "BBA/MBA/PG", "specialization": "", "experience": "3 years", "salary": "15,500-60,500(TA,Food,Accomodation,incetive)", "location": "Trivandrum,kollam,pathanamthitta,Ernakulam,Trissur,palakkad", "vacancies": "20" },
+            { "company": "WHITECORN GROUP", "role": "F & B associates", "sector": "Hospitality", "qualification": "Hotel Management Degree/Diploma", "specialization": "Food & beverages", "experience": "1 year and above", "salary": "18000-20000", "location": "Trivandrum", "vacancies": "3" },
             { "company": "Hotel Dimora Thiruvananthapuram", "role": "Front Office Associate", "sector": "Hospitality", "qualification": "Hotel Management Degree/Diploma", "specialization": "Front Office Operation", "experience": "1 year", "salary": "18000-20000", "location": "Trivandrum, Kozhikode", "vacancies": "3" },
             { "company": "Hotel Dimora Thiruvananthapuram", "role": "General Technician", "sector": "Hospitality", "qualification": "Diploma In Electrical/AC", "specialization": "Electric/AC", "experience": "1 year", "salary": "17000-19000", "location": "Trivandrum, Kozhikode", "vacancies": "2" },
-            { "company": "Belstar Microfinance Limited (Muthoot Group)", "role": "Sales Officer", "sector": "MFI-NBFC", "qualification": "10th /12th", "specialization": "Any", "experience": "Freshers /Experienced", "salary": "15,150 -20,000", "location": "Kallambalam, Kumarapuram, Vellanad, Neyyattinkara, Kattakada", "vacancies": "15" },
+            { "company": "Belstar Microfinance Limited (Muthoot Group)", "role": "Sales Officer", "sector": "MFI-NBFC", "qualification": "10th", "specialization": "Any", "experience": "Freshers /Experienced", "salary": "15,150 -20,000", "location": "Kallambalam, Kumarapuram, Vellanad, Neyyattinkara, Kattakada", "vacancies": "15" },
             { "company": "Muthoot Microfin Ltd", "role": "Field Officer", "sector": "NBFC", "qualification": "12th", "specialization": "NA", "experience": "Freshers", "salary": "25,000 Net Salary", "location": "Trivandrum", "vacancies": "15" },
-            { "company": "Professional Hospitality & Support Services", "role": "Housekeeping staff/ Hospital Cleaning staff", "sector": "Manpower Outsource", "qualification": "SSLC below", "specialization": "", "experience": "Freshers", "salary": "14000-17000", "location": "Trivandrum", "vacancies": "20" },
-            { "company": "Professional Hospitality & Support Services", "role": "Security Guard", "sector": "Manpower Outsource", "qualification": "SSLC", "specialization": "", "experience": "Freshers", "salary": "15000 to 17000", "location": "Trivandrum", "vacancies": "15" },
-            { "company": "Professional Hospitality & Support Services", "role": "Multitask Worker", "sector": "Manpower Outsource", "qualification": "ITI", "specialization": "Any trade", "experience": "Freshers", "salary": "14500 + ESI +EPF", "location": "Trivandrum", "vacancies": "5" },
-            { "company": "Muralya Dairy Products Pvt Ltd", "role": "Sales Promoter", "sector": "Dairy", "qualification": "12th and above", "specialization": "Two wheeler license (Female candidates with two wheeler license. Good communication skills )", "experience": "1-2 years", "salary": "15000 to 17000", "location": "Trivandrum", "vacancies": "3" },
-            { "company": "PIONEER MOTORS", "role": "HR Manager", "sector": "AUTOMOBILE", "qualification": "MBA in HR", "specialization": "", "experience": "3 years", "salary": "25000-30000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "PIONEER MOTORS", "role": "HR Executive", "sector": "AUTOMOBILE", "qualification": "MBA in HR", "specialization": "", "experience": "Freshers", "salary": "10000-15000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "PIONEER MOTORS", "role": "Asst Service Mananger", "sector": "AUTOMOBILE", "qualification": "Btech", "specialization": "Mechanical", "experience": "3 years", "salary": "25000-30000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "PIONEER MOTORS", "role": "Showroom Advisor", "sector": "AUTOMOBILE", "qualification": "12th above", "specialization": "", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "25" },
-            { "company": "PIONEER MOTORS", "role": "Service Advisor", "sector": "AUTOMOBILE", "qualification": "12th above", "specialization": "ITI/Diploma", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "PIONEER MOTORS", "role": "CRE", "sector": "AUTOMOBILE", "qualification": "12th above", "specialization": "", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "PIONEER MOTORS", "role": "Front office executive", "sector": "AUTOMOBILE", "qualification": "12th above", "specialization": "", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "PIONEER MOTORS", "role": "Technician", "sector": "AUTOMOBILE", "qualification": "10th /12th", "specialization": "Male candidate (up to age 50)", "experience": "3 years in Automobile Technician Field", "salary": "16000-25000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu &  Kaniyapuram", "vacancies": "" },
-            { "company": "BS Pioneer Vehicles And Services Pvt Ltd, Tata Motors Commercial Vehicle Dealer", "role": "Sale executives", "sector": "", "qualification": "12th above", "specialization": "", "experience": "Freshers", "salary": "12000-18000", "location": "Nalanchira,Attingal,Parassala", "vacancies": "" },
-            { "company": "BS Pioneer Vehicles And Services Pvt Ltd, Tata Motors Commercial Vehicle Dealer", "role": "Team leader", "sector": "Commercial vehicle", "qualification": "Degree", "specialization": "", "experience": "Freshers", "salary": "20000-30000", "location": "Nalanchira,Attingal,Parassala", "vacancies": "20" },
-            { "company": "BS Pioneer Vehicles And Services Pvt Ltd, Tata Motors Commercial Vehicle Dealer", "role": "Technician", "sector": "", "qualification": "ITI/Diploma", "specialization": "", "experience": "Freshers", "salary": "8000-10000", "location": "Nalanchira,Attingal,Parassala", "vacancies": "" },
-            { "company": "LIFE CARE", "role": "Junior officer", "sector": "Hospital Management", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "25000", "location": "All Kerala", "vacancies": "" },
-            { "company": "LIFE CARE", "role": "telecaller", "sector": "Hospital Management", "qualification": "10th/12th", "specialization": "", "experience": "Freshers", "salary": "13000", "location": "All Kerala", "vacancies": "36" },
-            { "company": "LIFE CARE", "role": "accountant", "sector": "Hospital Management", "qualification": "Degree", "specialization": "", "experience": "Freshers /Experienced", "salary": "18000", "location": "All Kerala", "vacancies": "" },
-            { "company": "LIFE CARE", "role": "Driver", "sector": "Hospital Management", "qualification": "10th", "specialization": "", "experience": "Experienced", "salary": "18000", "location": "All Kerala", "vacancies": "" },
-            { "company": "LIFE CARE", "role": "supervisor (Store/Stock)", "sector": "Hospital Management", "qualification": "10th", "specialization": "", "experience": "Freshers", "salary": "18000", "location": "All Kerala", "vacancies": "" },
-            { "company": "Popular Motor World PVT LTD", "role": "Sales executive", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "15000-35000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "" },
-            { "company": "Popular Motor World PVT LTD", "role": "Technician", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "15000-35000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "20" },
-            { "company": "Popular Motor World PVT LTD", "role": "Team leader", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "15000-35000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "" },
-            { "company": "Popular Motor World PVT LTD", "role": "Service Adviser", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "15000-35000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "" },
-            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "Housekeeping", "sector": "Hotel", "qualification": "Degree", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "" },
-            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "F&B Service", "sector": "Hotel", "qualification": "Degree", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "4" },
-            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "Fron Office", "sector": "Hotel", "qualification": "Degree", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "" },
-            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "Food Production", "sector": "Hotel", "qualification": "Degree", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "" },
-            { "company": "Electa Energy Pvt Ltd", "role": "Technician G1", "sector": "Energy", "qualification": "ITI / ITC", "specialization": "Electrical & Electronics industry, especially in energy sector", "experience": "Freshers - 2 year Experienced", "salary": "15000-25000", "location": "Keltron Junction, Karakulam, Thiruvananthapuram", "vacancies": "5" },
+            { "company": "Muthoot Microfin Ltd", "role": "Housekeeping staff/ Hospital Cleaning staff", "sector": "Manpower Outsource", "qualification": "10th below", "specialization": "", "experience": "Freshers", "salary": "14000-17000", "location": "Trivandrum", "vacancies": "20" },
+            { "company": "Professional Hospitality & Support Services", "role": "Security Guard", "sector": "Manpower Outsource", "qualification": "10th", "specialization": "", "experience": "Freshers", "salary": "15000 to 17000", "location": "Trivandrum", "vacancies": "15" },
+            { "company": "Professional Hospitality & Support Services", "role": "Multitask Worker", "sector": "Manpower Outsource", "qualification": "ITI/ITC/Diploma", "specialization": "Any trade", "experience": "Freshers", "salary": "14500 + ESI +EPF", "location": "Trivandrum", "vacancies": "5" },
+            { "company": "Muralya Dairy Products Pvt Ltd", "role": "Sales Promoter", "sector": "Dairy", "qualification": "12th", "specialization": "(Female candidates with two wheeler license. Good communication skills )", "experience": "1-2 years", "salary": "15000 to 17000", "location": "Trivandrum", "vacancies": "3" },
+            { "company": "PIONEER MOTORS", "role": "HR Manager", "sector": "AUTOMOBILE", "qualification": "MBA", "specialization": "", "experience": "3 years", "salary": "25000-30000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "1" },
+            { "company": "PIONEER MOTORS", "role": "HR Executive", "sector": "AUTOMOBILE", "qualification": "MBA", "specialization": "", "experience": "Freshers", "salary": "10000-15000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "1" },
+            { "company": "PIONEER MOTORS", "role": "Asst Service Mananger", "sector": "AUTOMOBILE", "qualification": "B Tech", "specialization": "Mechanical", "experience": "3 years", "salary": "25000-30000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "1" },
+            { "company": "PIONEER MOTORS", "role": "Showroom Advisor", "sector": "AUTOMOBILE", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "8" },
+            { "company": "PIONEER MOTORS", "role": "Service Advisor", "sector": "AUTOMOBILE", "qualification": "12th", "specialization": "ITI/Diploma", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "4" },
+            { "company": "PIONEER MOTORS", "role": "CRE", "sector": "AUTOMOBILE", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "3" },
+            { "company": "PIONEER MOTORS", "role": "Front office executive", "sector": "AUTOMOBILE", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "14000-16000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "2" },
+            { "company": "PIONEER MOTORS", "role": "Technician", "sector": "AUTOMOBILE", "qualification": "10th", "specialization": "Male candidate (up to age 50)", "experience": "3 years in Automobile Technician Field", "salary": "16000-25000", "location": "Kaimanam,Vazuthacaud,Enjakkal ,Nedumangadu & Kaniyapuram", "vacancies": "5" },
+            { "company": "BS Pioneer Vehicles And Services Pvt Ltd, Tata Motors Commercial Vehicle Dealer", "role": "Sale executives", "sector": "Commercial vehicle", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "12000-18000", "location": "Nalanchira,Attingal,Parassala", "vacancies": "10" },
+            { "company": "BS Pioneer Vehicles And Services Pvt Ltd, Tata Motors Commercial Vehicle Dealer", "role": "Team leader", "sector": "Commercial vehicle", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers", "salary": "20000-30000", "location": "Nalanchira,Attingal,Parassala", "vacancies": "5" },
+            { "company": "BS Pioneer Vehicles And Services Pvt Ltd, Tata Motors Commercial Vehicle Dealer", "role": "Technician", "sector": "Commercial vehicle", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers", "salary": "8000-10000", "location": "Nalanchira,Attingal,Parassala", "vacancies": "5" },
+            { "company": "LIFE CARE", "role": "Junior officer", "sector": "Hospital Management", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "25000", "location": "All Kerala", "vacancies": "20" },
+            { "company": "LIFE CARE", "role": "telecaller", "sector": "Hospital Management", "qualification": "10th", "specialization": "", "experience": "Freshers", "salary": "13000", "location": "All Kerala", "vacancies": "5" },
+            { "company": "LIFE CARE", "role": "accountant", "sector": "Hospital Management", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "18000", "location": "All Kerala", "vacancies": "4" },
+            { "company": "LIFE CARE", "role": "Driver", "sector": "Hospital Management", "qualification": "10th", "specialization": "", "experience": "Experienced", "salary": "18000", "location": "All Kerala", "vacancies": "2" },
+            { "company": "LIFE CARE", "role": "supervisor (Store/Stock)", "sector": "Hospital Management", "qualification": "10th", "specialization": "", "experience": "Freshers", "salary": "18000", "location": "All Kerala", "vacancies": "5" },
+            { "company": "Popular Motor World PVT LTD", "role": "Sales executive", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "15000-25000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "15" },
+            { "company": "Popular Motor World PVT LTD", "role": "Technician", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "12000-25000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "20" },
+            { "company": "Popular Motor World PVT LTD", "role": "Team leader", "sector": "Automobile", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "28000-40000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "4" },
+            { "company": "Popular Motor World PVT LTD", "role": "CRE", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "14000- 20000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "5" },
+            {
+                "company": "Popular Motor World PVT LTD", "role": "Service Adviser", "sector": "Automobile", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "16000-35000", "location": "Kattakada, Karakkamandapam, Pappanamcode, Charachira, Varkala, Kazhakoottam, Jagathy", "vacancies": "7"
+            },
+            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "Housekeeping", "sector": "Hotel", "qualification": "Degree/Diploma", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "1" },
+            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "F&B Service", "sector": "Hotel", "qualification": "Degree/Diploma", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "1" },
+            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "Fron Office", "sector": "Hotel", "qualification": "Degree/Diploma", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "1" },
+            { "company": "Lemon Tree Premier Thiruvananthapuram", "role": "Food Production", "sector": "Hotel", "qualification": "Degree/Diploma", "specialization": "PWD candidates only", "experience": "Freshers /Experienced", "salary": "18000", "location": "Thiruvananthapuram", "vacancies": "1" },
+            { "company": "Electa Energy Pvt Ltd", "role": "Technician G1", "sector": "Energy", "qualification": "ITI/ITC/Diploma", "specialization": "Electrical & Electronics industry, especially in energy sector", "experience": "Freshers - 2 year Experienced", "salary": "15000-25000", "location": "Keltron Junction, Karakulam, Thiruvananthapuram", "vacancies": "5" },
             { "company": "SWIGGY", "role": "Delivery partner", "sector": "Delivery", "qualification": "NA", "specialization": "", "experience": "NA", "salary": "Upto 48000", "location": "Pattom,thampanoor, kazhakoottam, technopark, neyyattinkara, kovalam, nedumangad", "vacancies": "100" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Associate Customer Service – International Voice Process", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "400" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Associate Technical Customer Support – International Voice Process", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Hindi", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Kannada", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Tamil", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Telugu", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Business Support Executive", "sector": "BFSI, IT & BPO Services", "qualification": "Any Graduate / Relevant professional certifications as per role", "specialization": "", "experience": "Freshers /Experienced", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Junior Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Senior Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Assistant Manager Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "NRI Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Equity Dealer", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Commodity Dealer", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Branch Sales Executive (House Loan / Personal Loan)", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Associate Agency Development Manager", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Relationship Manager", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Trinity SkillWorks Private Limited", "role": "Human Resources Executive", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "", "location": "Across Kerala", "vacancies": "" },
-            { "company": "Team waves", "role": "Business development manager", "sector": "education and entertainment division", "qualification": "Any Degree", "specialization": "", "experience": "Fresher", "salary": "18000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "125" },
-            { "company": "Team waves", "role": "Logistics Trainee", "sector": "education and entertainment division", "qualification": "Logistics Diploma/ Degree", "specialization": "", "experience": "Fresher", "salary": "12000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "" },
-            { "company": "Team waves", "role": "Admin Executive", "sector": "education and entertainment division", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "12000-15000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "" },
-            { "company": "Team waves", "role": "Business Development Executive", "sector": "education and entertainment division", "qualification": "12th/ iti/ diploma", "specialization": "", "experience": "Fresher", "salary": "15000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "" },
-            { "company": "Team waves", "role": "Accountant", "sector": "education and entertainment division", "qualification": "Degree+ GST filing", "specialization": "1 year experience in GST filing compulsory", "experience": "Experienced", "salary": "12000+ allowances (TA, food , Accomodation)", "location": "Trivandrum, Kochi and Calicut", "vacancies": "" },
-            { "company": "Ayur herbals", "role": "Junior officer", "sector": "Health care", "qualification": "Degree", "specialization": "", "experience": "Fresher", "salary": "16000- 20000", "location": "Trivandrum, Palakkad", "vacancies": "36" },
-            { "company": "Ayur herbals", "role": "Data entry", "sector": "Health care", "qualification": "12th & DCA", "specialization": "", "experience": "Freshers /Experienced", "salary": "10000- 14000", "location": "Trivandrum, Palakkad", "vacancies": "" },
-            { "company": "Ayur herbals", "role": "Tele caller", "sector": "Health care", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "10000-12000", "location": "Trivandrum, Palakkad", "vacancies": "" },
-            { "company": "Ayur herbals", "role": "Sales Coordinator", "sector": "Health care", "qualification": "12th & above", "specialization": "", "experience": "Freshers /Experienced", "salary": "14000-16000", "location": "Trivandrum, Palakkad", "vacancies": "" },
-            { "company": "Ayur herbals", "role": "Packing", "sector": "Health care", "qualification": "10th above", "specialization": "female prefered", "experience": "Freshers", "salary": "10000", "location": "Trivandrum, Palakkad", "vacancies": "" },
-            { "company": "Ayur herbals", "role": "Sales staff", "sector": "Health care", "qualification": "12th & above", "specialization": "", "experience": "Freshers /Experienced", "salary": "10000-15000", "location": "Trivandrum, Palakkad", "vacancies": "" },
-            { "company": "Info Apps", "role": "Office Assistant", "sector": "Learning Application Promoting Company", "qualification": "Degree", "specialization": "", "experience": "Freshers", "salary": "15000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "45" },
-            { "company": "Info Apps", "role": "Business Development Executive", "sector": "Learning Application Promoting Company", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "15000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "" },
-            { "company": "Info Apps", "role": "Business Development Manager", "sector": "Learning Application Promoting Company", "qualification": "Degree", "specialization": "", "experience": "I year", "salary": "20000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "" },
-            { "company": "Info Apps", "role": "Marketing Executive", "sector": "Learning Application Promoting Company", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "15000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "" },
-            { "company": "Info Apps", "role": "Telecalling", "sector": "Learning Application Promoting Company", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "12000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "" },
-            { "company": "Digitide", "role": "CCE", "sector": "CCE", "qualification": "12th or any degree", "specialization": "", "experience": "0-2 years", "salary": "15000-23000", "location": "Coimbatore , Chennai, Hyderabad , Bangalore", "vacancies": "100" },
-            { "company": "Teleperformance", "role": "Voice Process", "sector": "bpo", "qualification": "12th or any degree", "specialization": "", "experience": "Freshers", "salary": "13000-17000", "location": "Chennai", "vacancies": "50" },
-            { "company": "Quess", "role": "xiomi sales promoter", "sector": "Retail", "qualification": "", "specialization": "", "experience": "", "salary": "18000-20000 PF & ESI separate", "location": "All kerala", "vacancies": "252" }
+            { "company": "Trinity SkillWorks Private Limited", "role": "Associate Customer Service – International Voice Process", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "28000-37000", "location": "Trivandrum, ", "vacancies": "40" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Associate Technical Customer Support – International Voice Process", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "19000-32000", "location": "Kochi", "vacancies": "40" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Hindi", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "19000-30000", "location": "Kochi", "vacancies": "25" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Kannada", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "19000-30000", "location": "Kochi", "vacancies": "40" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Tamil", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "19000-30000", "location": "Kochi", "vacancies": "40" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Customer Experience Specialist – Telugu", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "19000-30000", "location": "Kochi", "vacancies": "40" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Business Support Executive", "sector": "BFSI, IT & BPO Services", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "21000-40000", "location": "Trivandrum, Tiruvalla, Kollam", "vacancies": "3" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "19000-26000", "location": "Across Kerala", "vacancies": "29" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Junior Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "26000-32000", "location": "Across Kerala", "vacancies": "10" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Senior Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "32000-40000", "location": "Across Kerala", "vacancies": "12" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Assistant Manager Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "40000-60000", "location": "Across Kerala", "vacancies": "6" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "NRI Financial Consultant", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "30000-52000", "location": "Across Kerala", "vacancies": "10" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Equity Dealer", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "21000-40000", "location": "Across Kerala", "vacancies": "4" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Commodity Dealer", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "24000-35000", "location": "Across Kerala", "vacancies": "3" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Branch Sales Executive (House Loan / Personal Loan)", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "24000", "location": "Across Kerala", "vacancies": "21" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Associate Agency Development Manager", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "25000-58000", "location": "Across Kerala", "vacancies": "12" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Relationship Manager", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "25000-33000", "location": "Across Kerala", "vacancies": "8" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "Human Resources Executive", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "6 months – 5 years", "salary": "15000- 25000", "location": "Nalanchira , Trivandrum", "vacancies": "2" },
+            { "company": "Trinity SkillWorks Private Limited", "role": "HR intern", "sector": "BFSI, IT & BPO Services", "qualification": "UG/PG/MBA/MCom", "specialization": "Minimum education requirement for specific banks/financial roles", "experience": "Fresher- 6 months ", "salary": "12000-15000 TA ", "location": "Nalanchira , Trivandrum", "vacancies": "1" },
+            { "company": "Team waves", "role": "Business development manager", "sector": "education and entertainment division", "qualification": "Degree/Diploma", "specialization": "", "experience": "Fresher", "salary": "18000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "36" },
+            { "company": "Team waves", "role": "Logistics Trainee", "sector": "education and entertainment division", "qualification": "Logistics Diploma/ Degree", "specialization": "", "experience": "Fresher", "salary": "12000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "9" },
+            { "company": "Team waves", "role": "Admin Executive", "sector": "education and entertainment division", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "12000-15000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "18" },
+            { "company": "Team waves", "role": "Business Development Executive", "sector": "education and entertainment division", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Fresher", "salary": "15000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "32" },
+            { "company": "Team waves", "role": "Graphic Designer", "sector": "education and entertainment division", "qualification": "Graphic designing Course", "specialization": "", "experience": "Experienced", "salary": "20000", "location": "Trivandrum, Kochi and Calicut", "vacancies": "5" },
+            { "company": "Team waves", "role": "Accountant", "sector": "education and entertainment division", "qualification": "Degree+ GST filing", "specialization": "1 year experience in GST filing compulsory", "experience": "Experienced", "salary": "12000+ allowances (TA, food , Accomodation)", "location": "Trivandrum, Kochi and Calicut", "vacancies": "15" },
+            { "company": "Team waves", "role": "Collection Executive", "sector": "education and entertainment division", "qualification": "10th", "specialization": "", "experience": "", "salary": "15000", "location": "", "vacancies": "10" },
+            { "company": "Ayur herbals", "role": "Junior officer", "sector": "Health care", "qualification": "Degree/Diploma", "specialization": "", "experience": "Fresher", "salary": "16000- 20000", "location": "Trivandrum, Palakkad", "vacancies": "10" },
+            { "company": "Ayur herbals", "role": "Data entry", "sector": "Health care", "qualification": "12th & DCA", "specialization": "", "experience": "Freshers /Experienced", "salary": "10000- 14000", "location": "Trivandrum, Palakkad", "vacancies": "2" },
+            { "company": "Ayur herbals", "role": "Tele caller", "sector": "Health care", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "10000-12000", "location": "Trivandrum, Palakkad", "vacancies": "2" },
+            { "company": "Ayur herbals", "role": "Sales Coordinator", "sector": "Health care", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "14000-16000", "location": "Trivandrum, Palakkad", "vacancies": "8" },
+            { "company": "Ayur herbals", "role": "Packing", "sector": "Health care", "qualification": "10th", "specialization": "female prefered", "experience": "Freshers", "salary": "10000", "location": "Trivandrum, Palakkad", "vacancies": "6" },
+            { "company": "Ayur herbals", "role": "Sales staff", "sector": "Health care", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "10000-15000", "location": "Trivandrum, Palakkad", "vacancies": "8" },
+            { "company": "Info Apps", "role": "Office Assistant", "sector": "Learning Application Promoting Company", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers", "salary": "15000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "3" },
+            { "company": "Info Apps", "role": "Business Development Executive", "sector": "Learning Application Promoting Company", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "15000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "15" },
+            { "company": "Info Apps", "role": "Business Development Manager", "sector": "Learning Application Promoting Company", "qualification": "Degree/Diploma", "specialization": "", "experience": "I year", "salary": "20000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "10" },
+            { "company": "Info Apps", "role": "Marketing Executive", "sector": "Learning Application Promoting Company", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "15000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "7" },
+            { "company": "Info Apps", "role": "Telecalling", "sector": "Learning Application Promoting Company", "qualification": "12th", "specialization": "", "experience": "Freshers", "salary": "12000", "location": "Kozhikode Ernakulam Trivandrum", "vacancies": "10" },
+            { "company": "Quess", "role": "xiomi sales promoter", "sector": "Retail", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "18000-20000 PF & ESI separate", "location": "All kerala", "vacancies": "252" },
+            { "company": "ULCCS", "role": "RURAL MASON (CIVIL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "150" },
+            { "company": "ULCCS", "role": "BAR BENDER (CIVIL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "125" },
+            { "company": "ULCCS", "role": "SHUTTERING MASON (CIVIL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "150" },
+            { "company": "ULCCS", "role": "STAGING MASON (CIVIL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "100" },
+            { "company": "ULCCS", "role": "SCAFFOLDING (CIVIL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "75" },
+            { "company": "ULCCS", "role": "CONCRETE MASON (CIVIL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "100" },
+            { "company": "ULCCS", "role": "INTERIOR (INTERIOR FITOUT)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "150" },
+            { "company": "ULCCS", "role": "FLOORING (INTERIOR FITOUT)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "150" },
+            { "company": "ULCCS", "role": "LANDSCAPING (INTERIOR FITOUT)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "25" },
+            { "company": "ULCCS", "role": "ELECTRONICS(GENERAL)SKILLED (ELECTRICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "100" },
+            { "company": "ULCCS", "role": "INDUSTRIAL ELECTRONICS (ELECTRICAL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "25" },
+            { "company": "ULCCS", "role": "WIREMAN-SEMI SKILLED (ELECTRICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "30" },
+            { "company": "ULCCS", "role": "PANEL & CONTROL WIRING TECHNICIAN (ELECTRICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "15" },
+            { "company": "ULCCS", "role": "WIRING & SOLAR ENERGY TECHNICIAN (ELECTRICAL)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "15" },
+            { "company": "ULCCS", "role": "MAINTENANCE TECHNICIAN (ELECTRICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "20" },
+            { "company": "ULCCS", "role": "TECHNICIANS & TECHNICIAN HELPER(ELECTRICAL & ELECTRONICS)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "15" },
+            { "company": "ULCCS", "role": "PUBLIC HEALTH ENGINEERING (PLUMBER)", "sector": "CONSTRUCTION", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "25" },
+            { "company": "ULCCS", "role": "FIRE PROTECTION SYSTEM (SAFETY)TECHNICIANB(MECHANICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "10" },
+            { "company": "ULCCS", "role": "HVAC (MECHANICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "8" },
+            { "company": "ULCCS", "role": "WELDER (MECHANICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "30" },
+            { "company": "ULCCS", "role": "ALUMINIUM FABRICATOR (MECHANICAL)", "sector": "CONSTRUCTION", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "30" },
+            { "company": "ULCCS", "role": "LAB TECHNICIAN (LABORATORY)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "20" },
+            { "company": "ULCCS", "role": "LAB ASSISTANT (LABORATORY)", "sector": "CONSTRUCTION", "qualification": "10th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "34" },
+            { "company": "ULCCS", "role": "MECHANIC HYDRAULIC", "sector": "CONSTRUCTION", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "40" },
+            { "company": "ULCCS", "role": "ASSISTANT EXCAVATOR OPERATOR", "sector": "CONSTRUCTION", "qualification": "12th", "specialization": "", "experience": "Freshers /Experienced", "salary": "AS PER INDUSTRY STANDARD", "location": "All kerala", "vacancies": "40" },
+            { "company": "Zudio", "role": "Sales Associates", "sector": "Fashion Retail", "qualification": "10th", "specialization": "", "experience": "Fresher", "salary": "14000", "location": "", "vacancies": "25" },
+            { "company": "Zudio", "role": "Sales Officers & Department Managers", "sector": "Fashion Retail", "qualification": "12th", "specialization": "", "experience": "1 to 5 years", "salary": "15000 - 25000", "location": "", "vacancies": "15" },
+            { "company": "iCloudhomes -iScape Designers Pvt LTD", "role": "Site Engineers", "sector": "Builders and Construction", "qualification": "B Tech/Diploma", "specialization": "", "experience": "Freshers /Minimum 1 to 2 years", "salary": "10000-15000", "location": "", "vacancies": "3" },
+            { "company": "iCloudhomes -iScape Designers Pvt LTD", "role": "Electrical Engineers", "sector": "Builders and Construction", "qualification": "B Tech/Diploma", "specialization": "", "experience": "Freshers /Minimum 1 to 2 years", "salary": "15000-20000", "location": "", "vacancies": "2" },
+            { "company": "iCloudhomes -iScape Designers Pvt LTD", "role": "Carpenter", "sector": "Builders and Construction", "qualification": "ITI/ITC/Diploma", "specialization": "", "experience": "Freshers /Minimum 1 to 2 years", "salary": "10000-15000", "location": "", "vacancies": "2" },
+            { "company": "iCloudhomes -iScape Designers Pvt LTD", "role": "Driver/ Mechanic", "sector": "Builders and Construction", "qualification": "ITI/ITC/Diploma", "specialization": "Machine Mechanic is preffered", "experience": "Freshers /Minimum 1 to 2 years", "salary": "10000-15000", "location": "", "vacancies": "1" },
+            { "company": "iCloudhomes -iScape Designers Pvt LTD", "role": "Sales Trainee", "sector": "Builders and Construction", "qualification": "Degree/Diploma", "specialization": "", "experience": "Freshers /Minimum 1 to 2 years", "salary": "12000-20000", "location": "", "vacancies": "2" },
+            { "company": "HDFC LIFE", "role": "Business development Managers", "sector": "Insurance/Banking", "qualification": "Degree/Diploma", "specialization": "1 year Experience in Insurance field is must", "experience": "1 year", "salary": "27000", "location": "", "vacancies": "10" },
+            { "company": "HDFC LIFE", "role": "Financial consultant", "sector": "Insurance/Banking", "qualification": "12th", "specialization": "", "experience": "Fresher", "salary": "15000-25000", "location": "", "vacancies": "25" },
+            { "company": "ODEPC", "role": "Art Teacher (Indian School , SULTHANATE OF OMAN)", "sector": "Education", "qualification": "Bachelor of Fine Arts", "specialization": "", "experience": "2", "salary": "OMR 300/-", "location": "", "vacancies": "1" },
+            { "company": "ODEPC", "role": "Assistant Nurse Homecare ( Dr.Sunny Home Health Care United Arab Emirates)", "sector": "Health care", "qualification": "GNM with MOH/DHA License as Assistant Nurse", "specialization": "GNM with MOH/DHA License as Assistant Nurse", "experience": "1 year and above in Hospital/ Clinic/ Homecare", "salary": "AED 3,500/-", "location": "", "vacancies": "50" },
+            { "company": "ODEPC", "role": "Male Industrial Nurse- at UAE", "sector": "Health care", "qualification": "BSc Nursing", "specialization": "BSc Nursing / Post Basic BSc Nursing", "experience": "2 Years", "salary": "AED 5,000/-", "location": "", "vacancies": "100" },
+            { "company": "Muralya Dairy Products Pvt Ltd", "role": "Field sales Executive", "sector": "Dairy", "qualification": "12th", "specialization": "", "experience": "1-3 years", "salary": "18000- 20000", "location": "Trivandrum", "vacancies": "3" },
+            { "company": "Muralya Dairy Products Pvt Ltd", "role": "Cashier", "sector": "Dairy", "qualification": "BCOM", "specialization": "Male candidates-Working experience as cashier", "experience": "3-5 years", "salary": "up to 250000", "location": "Trivandrum, Ernakulam", "vacancies": "2" },
+            { "company": "Muralya Dairy Products Pvt Ltd", "role": "Drivers- Heavy/ Light Vehicle Motor", "sector": "Dairy", "qualification": "10 th", "specialization": "Below 35 years of age", "experience": "3- 5 years", "salary": "20000", "location": "Trivandrum", "vacancies": "4" },
+            { "company": "Muralya Dairy Products Pvt Ltd", "role": "Helper", "sector": "Dairy", "qualification": "10th / 12th", "specialization": "Male candidates", "experience": "Fresher", "salary": "15500", "location": "Trivandrum", "vacancies": "6" }
         ];
 
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbyYGskWMk16ibanumSnjuoI5vO4k88b67UceocRrzMk3awwOSYYEOdbaefB5JfiSro/exec';
 
-        const mobile = sessionStorage.getItem("candidate_mobile") || "";
-        const candidateName = sessionStorage.getItem("candidate_name") || "";
-        const regId = sessionStorage.getItem("candidate_regId") || "";
-        const gender = sessionStorage.getItem("candidate_gender") || "";
-        const pwd = sessionStorage.getItem("candidate_pwd") || "No";
+        let mobile = sessionStorage.getItem("candidate_mobile") || "";
+        let candidateName = sessionStorage.getItem("candidate_name") || "";
+        let regId = sessionStorage.getItem("candidate_regId") || "";
+        let gender = sessionStorage.getItem("candidate_gender") || "";
+        let pwd = sessionStorage.getItem("candidate_pwd") || "No";
 
-        if (candidateName) document.getElementById("welcomeText").innerText = "Welcome, " + candidateName + "!";
-        if (regId) document.getElementById("candidateId").innerText = "Reg ID: " + regId;
+        function updateHeaderUI() {
+            if (candidateName) document.getElementById("welcomeText").innerText = "Welcome, " + candidateName + "!";
+            if (regId) document.getElementById("candidateId").innerText = "Reg ID: " + regId;
+        }
+        updateHeaderUI();
 
+        const ACTIVE_VACANCIES = VACANCY_DATA.filter(v => parseInt(v.vacancies) > 0);
         let selectedJobs = [];
 
         (function init() {
-            document.getElementById("statCompanies").innerText = new Set(VACANCY_DATA.map(v => v.company)).size;
-            document.getElementById("statRoles").innerText = new Set(VACANCY_DATA.map(v => v.role)).size;
-            document.getElementById("statTotal").innerText = VACANCY_DATA.length;
+            const totalOpenings = ACTIVE_VACANCIES.reduce((sum, v) => sum + (parseInt(v.vacancies) || 0), 0);
+            document.getElementById("statCompanies").innerText = new Set(ACTIVE_VACANCIES.map(v => v.company)).size;
+            document.getElementById("statRoles").innerText = new Set(ACTIVE_VACANCIES.map(v => v.role)).size;
+            document.getElementById("statTotal").innerText = totalOpenings.toLocaleString();
 
             const sel = document.getElementById("jobRoleFilter");
             sel.innerHTML = '<option value="">All Job Roles</option>';
-            [...new Set(VACANCY_DATA.map(v => v.role).filter(Boolean))].sort().forEach(r => {
+            [...new Set(ACTIVE_VACANCIES.map(v => v.role).filter(Boolean))].sort().forEach(r => {
                 const o = document.createElement("option");
                 o.value = o.textContent = r;
                 sel.appendChild(o);
             });
 
-            renderTable(VACANCY_DATA);
+            renderTable(ACTIVE_VACANCIES);
             setTimeout(checkStatus, 500);
         })();
 
@@ -752,21 +790,40 @@
         function lockDashboard(jobs) {
             document.getElementById("applySection").style.display = "none";
             document.getElementById("appliedView").style.display = "block";
-            document.getElementById("appliedList").innerHTML = jobs.map(j => `
-        <div class="vacancy-card">
-            <div class="co">${esc(j.company)}</div>
-            <h4>${esc(j.role)}</h4>
-            <div style="margin-top:.75rem;padding:.4rem .9rem;background:#fef3c7;color:#92400e;
-                        border-radius:.5rem;font-weight:600;font-size:.85rem;display:inline-block;">
-                Status: ${esc(j.status || "Submitted")}
-            </div>
-        </div>`).join("");
+            document.getElementById("appliedList").innerHTML = jobs.map(j => {
+                const status = j.status || "Submitted";
+                const colors = {
+                    "Pending": { bg: "#fef3c7", text: "#92400e" },
+                    "Submitted": { bg: "#fef3c7", text: "#92400e" },
+                    "Interviewed": { bg: "#e0f2fe", text: "#075985" },
+                    "Selected": { bg: "#dcfce7", text: "#166534" },
+                    "Rejected": { bg: "#fee2e2", text: "#991b1b" }
+                };
+                const style = colors[status] || colors["Pending"];
+
+                return `
+                <div class="vacancy-card" style="background:#fff; border: 1px solid #e2e8f0; border-radius:1rem; padding:1.25rem;">
+                    <div class="co" style="font-size:0.8rem; color:var(--secondary); font-weight:600;">${esc(j.company)}</div>
+                    <h4 style="margin: 0.25rem 0 0.75rem 0;">${esc(j.role)}</h4>
+                    <div style="padding:.4rem .9rem; background:${style.bg}; color:${style.text};
+                                border-radius:.5rem; font-weight:700; font-size:.85rem; display:inline-block;">
+                        Status: ${esc(status)}
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        function refreshApplicationStatus() {
+            const btn = document.getElementById("refreshStatusBtn");
+            if (btn) { btn.innerText = "⏳ Checking..."; btn.disabled = true; }
+            checkStatus();
+            setTimeout(() => { if (btn) { btn.innerText = "🔄 Refresh Status"; btn.disabled = false; } }, 2000);
         }
 
         function filterJobs() {
             const role = document.getElementById("jobRoleFilter").value;
             const search = document.getElementById("globalSearch").value.toLowerCase().trim();
-            const list = VACANCY_DATA.filter(v => {
+            const list = ACTIVE_VACANCIES.filter(v => {
                 const mr = !role || v.role === role;
                 const ms = !search ||
                     v.role.toLowerCase().includes(search) ||
@@ -794,7 +851,7 @@
                 return;
             }
 
-            countEl.innerText = "Showing " + list.length + " of " + VACANCY_DATA.length + " vacancies";
+            countEl.innerText = "Showing " + list.length + " of " + ACTIVE_VACANCIES.length + " vacancies";
             let html = `<table class="vacancy-table">
         <thead><tr><th>#</th><th>Role & Employer</th><th>Qualification & Exp</th><th>Location & Salary</th><th>Action</th></tr></thead><tbody>`;
 
@@ -846,14 +903,33 @@
         }
 
         function updatePanel() {
-            document.getElementById("count").innerText = selectedJobs.length;
-            document.getElementById("finalApply").disabled = (selectedJobs.length === 0);
+            const count = selectedJobs.length;
+            document.getElementById("count").innerText = count;
+
+            // SECURITY: Disable button if no jobs OR if user profile is not loaded/synced yet
+            const isProfileMissing = !regId || !mobile;
+            const btn = document.getElementById("finalApply");
+            btn.disabled = count === 0 || isProfileMissing;
+
+            if (isProfileMissing) {
+                btn.innerText = "⏳ Syncing Profile...";
+            } else {
+                btn.innerText = "✅ Apply Now";
+            }
+
             document.getElementById("selectedList").innerHTML = selectedJobs.map(j => `
         <div class="selected-item">${esc(j)} <span class="remove-btn" onclick="toggleJob(${esc(JSON.stringify(j))})">×</span></div>`).join("");
         }
 
         document.getElementById("finalApply").onclick = function () {
             const btn = this; btn.disabled = true; btn.innerText = "⏳ Submitting…";
+            // Refresh variables from sessionStorage just in case they were recovered by the auth listener
+            mobile = sessionStorage.getItem("candidate_mobile") || "";
+            candidateName = sessionStorage.getItem("candidate_name") || "";
+            regId = sessionStorage.getItem("candidate_regId") || "";
+            gender = sessionStorage.getItem("candidate_gender") || "";
+            pwd = sessionStorage.getItem("candidate_pwd") || "No";
+
             fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({ action: "applyJobs", mobile, fullName: candidateName, regId, gender, pwd, selectedJobs })
@@ -927,9 +1003,46 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script>
         firebase.initializeApp({ apiKey: "AIzaSyARoLteIbD8oFPEtKJ3ZvhxkiOHNgfC-I4", authDomain: "placements2026-free.firebaseapp.com", projectId: "placements2026-free", storageBucket: "placements2026-free.firebasestorage.app", messagingSenderId: "672350914241", appId: "1:672350914241:web:171f23d75e76a96f103640" });
-        firebase.auth().onAuthStateChanged(user => { if (!user) window.location.href = "login.html"; });
+
+        firebase.auth().onAuthStateChanged(async user => {
+            if (!user) {
+                window.location.href = "login.html";
+            } else if (!sessionStorage.getItem("candidate_mobile")) {
+                console.log("Session lost, recovering user data from Firestore...");
+                try {
+                    const db = firebase.firestore();
+                    const mobileNum = user.email.split('@')[0];
+                    const doc = await db.collection("users").doc(mobileNum).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        sessionStorage.setItem('candidate_mobile', mobileNum);
+                        sessionStorage.setItem('candidate_name', data.fullName || data.name || data.Name || "");
+                        sessionStorage.setItem('candidate_gender', data.gender || data.Gender || "");
+                        sessionStorage.setItem('candidate_pwd', data.pwd || "No");
+                        const foundRegId = data.regId || data.RegId || data.reg_id || data.registrationId || data.candidateId || data.id || "";
+                        sessionStorage.setItem('candidate_regId', foundRegId);
+
+                        // Update local variables for the applyJobs function
+                        mobile = mobileNum;
+                        candidateName = sessionStorage.getItem('candidate_name');
+                        regId = foundRegId;
+                        gender = sessionStorage.getItem('candidate_gender');
+                        pwd = sessionStorage.getItem('candidate_pwd');
+
+                        updateHeaderUI();
+                        updatePanel(); // Refresh button state
+                        console.log("Data recovered successfully.");
+                        // Re-check status now that we have the regId
+                        checkStatus();
+                    }
+                } catch (e) {
+                    console.error("Failed to recover user data:", e);
+                }
+            }
+        });
     </script>
 </body>
 
